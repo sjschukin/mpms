@@ -1,0 +1,6 @@
+# top-most .editorconfig file
+root = true
+
+# use tabs for indentation
+[*]
+indent_style = space
