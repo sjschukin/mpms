@@ -1,4 +1,4 @@
-namespace MPMS.Models;
+namespace Mpms.Models;
 
 public class ErrorViewModel
 {

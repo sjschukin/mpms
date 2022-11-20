@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using MPMS.Models;
+using Mpms.Models;
 
-namespace MPMS.Controllers;
+namespace Mpms.Controllers;
 
 public class HomeController : Controller
 {
