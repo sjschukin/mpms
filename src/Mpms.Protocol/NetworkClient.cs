@@ -2,32 +2,31 @@ using Mpms.Common;
 using System.Net;
 using System.Net.Sockets;
 using System.Timers;
+using Microsoft.Extensions.Options;
 using Mpms.Protocol.Data;
 using Timer = System.Timers.Timer;
 
 namespace Mpms.Protocol;
 
-public class MpdTcpClient : IMpdClient
+public class NetworkClient : IMpdClient
 {
-    private const int PING_INTERVAL = 10000;
-
     private readonly TcpClient _client;
     private NetworkStream? _stream;
     private readonly ResponseParser _parser;
     private readonly Timer _heartBeatTimer;
     private bool _isBusy;
-    
-    public MpdTcpClient(MpdTcpClientParameters parameters)
+
+    public NetworkClient(IOptions<MpdConnectionOptions> configuration)
     {
         _client = new TcpClient();
         _parser = new ResponseParser();
-        _heartBeatTimer = new Timer(PING_INTERVAL) {AutoReset = true};
-        Parameters = parameters;
-        
+        Parameters = configuration.Value;
+        _heartBeatTimer = new Timer(Parameters.HeartBeatInterval) {AutoReset = true};
+
         _heartBeatTimer.Elapsed += OnHeartBeatTimerElapsed;
     }
 
-    public MpdTcpClientParameters Parameters { get; }
+    public MpdConnectionOptions Parameters { get; }
     public string? ProtocolVersion { get; set; }
 
     public void Run()
@@ -43,15 +42,15 @@ public class MpdTcpClient : IMpdClient
 
     private void EstablishConnection()
     {
-        IPAddress? address = Dns.GetHostEntry(Parameters.Host).AddressList.FirstOrDefault();
-        
+        IPAddress? address = Dns.GetHostEntry(Parameters.Address).AddressList.FirstOrDefault();
+
         if (address is null)
             throw new Exception("Cannot resolve host address.");
 
         var endPoint = new IPEndPoint(address, Parameters.Port);
 
-        _client.SendTimeout = Parameters.Timeout;
-        _client.ReceiveTimeout = Parameters.Timeout;
+        _client.SendTimeout = Parameters.CommandTimeout;
+        _client.ReceiveTimeout = Parameters.CommandTimeout;
         _client.Connect(endPoint);
         _stream = _client.GetStream();
 
@@ -70,7 +69,7 @@ public class MpdTcpClient : IMpdClient
         {
             _isBusy = true;
             _stream.Write(sendBuffer, 0, sendBuffer.Length);
-        
+
             return _parser.Parse<TResponse>(_stream.ReadAllData());
         }
         finally
