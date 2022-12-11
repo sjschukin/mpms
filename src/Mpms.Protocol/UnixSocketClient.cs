@@ -2,7 +2,7 @@ using System.Net.Sockets;
 using System.Timers;
 using Microsoft.Extensions.Options;
 using Mpms.Common;
-using Mpms.Protocol.Data;
+using Mpms.Protocol.Commands;
 using Timer = System.Timers.Timer;
 
 namespace Mpms.Protocol;
