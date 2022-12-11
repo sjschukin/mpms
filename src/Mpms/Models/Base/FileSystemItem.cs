@@ -2,9 +2,9 @@ using Mpms.Models.Enums;
 
 namespace Mpms.Models.Base;
 
-public abstract class FileSystemItemBase
+public abstract class FileSystemItem
 {
-    protected FileSystemItemBase(string name, string path)
+    protected FileSystemItem(string name, string path)
     {
         Name = name;
         Path = path;

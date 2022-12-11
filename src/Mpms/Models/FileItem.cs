@@ -4,7 +4,7 @@ using Mpms.Models.Enums;
 
 namespace Mpms.Models;
 
-public class FileItem : FileSystemItemBase
+public class FileItem : FileSystemItem
 {
     public FileItem(string name, string path, SongMetadata metadata) : base(name, path)
     {

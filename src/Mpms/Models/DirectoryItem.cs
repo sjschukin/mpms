@@ -3,7 +3,7 @@ using Mpms.Models.Enums;
 
 namespace Mpms.Models;
 
-public class DirectoryItem : FileSystemItemBase
+public class DirectoryItem : FileSystemItem
 {
     public DirectoryItem(string name, string path) : base(name, path)
     {
