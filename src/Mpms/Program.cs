@@ -40,9 +40,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
+using var client = app.Services.GetService<IMpdClient>();
+
+client?.Run();
 app.Run();
