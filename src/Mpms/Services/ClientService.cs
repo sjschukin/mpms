@@ -4,28 +4,46 @@ namespace Mpms.Services;
 
 public class ClientService : BackgroundService
 {
-    private readonly ILogger<ClientService> _logger;
-    private readonly IClient _client;
+    private const int DELAY_DURATION = 3000;
 
-    public ClientService(ILogger<ClientService> logger, IClient client)
+    private readonly ILogger<ClientService> _logger;
+    private readonly IServiceScopeFactory _factory;
+
+    public ClientService(ILogger<ClientService> logger, IServiceScopeFactory factory)
     {
         _logger = logger;
-        _client = client;
+        _factory = factory;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("{name} is starting.", nameof(ClientService));
+        var scope = _factory.CreateScope();
 
-        stoppingToken.Register(OnStopServiceCallback);
-        await _client.EstablishConnectionAsync();
+        try
+        {
+            _logger.LogInformation("{name} is starting.", nameof(ClientService));
 
-        _logger.LogInformation("{name} has stopped.", nameof(ClientService));
+            IClient client = scope.ServiceProvider.GetRequiredService<IClient>();
+            stoppingToken.Register(OnStopServiceCallback);
+            await client.EstablishConnectionAsync();
+
+            while (!stoppingToken.IsCancellationRequested)
+                await Task.Delay(DELAY_DURATION, CancellationToken.None);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Unhandled exception occured.");
+            throw;
+        }
+        finally
+        {
+            scope.Dispose();
+            _logger.LogInformation("{name} has stopped.", nameof(ClientService));
+        }
     }
 
-    private async void OnStopServiceCallback()
+    private void OnStopServiceCallback()
     {
         _logger.LogInformation("{name} is stopping.", nameof(ClientService));
-        await _client.CloseConnectionAsync();
     }
 }
