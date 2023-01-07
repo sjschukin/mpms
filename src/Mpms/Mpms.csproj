@@ -13,7 +13,11 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Mpms.Common\Mpms.Common.csproj" />
-      <ProjectReference Include="..\Mpms.Protocol\Mpms.Protocol.csproj" />
+      <ProjectReference Include="..\Mpms.MpdClient\Mpms.MpdClient.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Extensions" />
     </ItemGroup>
 
 </Project>

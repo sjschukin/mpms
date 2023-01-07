@@ -1,34 +1,18 @@
-using Mpms.Common;
-using Mpms.Protocol;
+using Mpms.MpdClient;
+using Mpms.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configuration
-builder.Services.Configure<MpdConnectionOptions>(options =>
-    builder.Configuration.Bind(MpdConnectionOptions.SECTION_NAME, options));
-
 // Add services to the container
-MpdConnectionOptions? mpdConnectionOptions = builder.Configuration.Get<MpdConnectionOptions>();
-
-if (mpdConnectionOptions is null)
-    throw new Exception("MPD connection section is not found in configuration file.");
-
-switch (mpdConnectionOptions.Type)
-{
-    case "UnixSocket":
-        builder.Services.AddSingleton<IMpdClient, UnixSocketClient>();
-        break;
-    case "Network":
-        builder.Services.AddSingleton<IMpdClient, NetworkClient>();
-        break;
-    default:
-        throw new Exception("MPD connection type is not recognized. Supported: UnixSocket, Network.");
-}
+builder.Services.AddMpdClient(builder.Configuration);
 
 builder.Services.AddControllers();
+builder.Services.AddHostedService<ClientService>();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services
+    .AddEndpointsApiExplorer()
+    .AddSwaggerGen();
 
 var app = builder.Build();
 
@@ -43,7 +27,4 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 
-using var client = app.Services.GetService<IMpdClient>();
-
-client?.Run();
-app.Run();
+await app.RunAsync();
