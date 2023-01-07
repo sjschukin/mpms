@@ -3,6 +3,7 @@ using System.Timers;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mpms.Common;
+using Mpms.MpdClient.Base;
 using Mpms.MpdClient.Commands;
 using Mpms.MpdClient.Extensions;
 using Timer = System.Timers.Timer;
@@ -12,22 +13,21 @@ namespace Mpms.MpdClient;
 public class MpdClient : IClient
 {
     private readonly ILogger<MpdClient> _logger;
-    private readonly IConnectionAdapter _connectionAdapter;
     private readonly Timer _heartBeatTimer;
+    private readonly IConnectionAdapter _connectionAdapter;
     private NetworkStream? _stream;
 
-    public MpdClient(ILogger<MpdClient> logger, IOptions<MpdConnectionOptions> configuration, IConnectionAdapter connectionAdapter)
+    public MpdClient(ILogger<MpdClient> logger, IConnectionAdapterFactory factory, IOptions<MpdConnectionOptions> configuration)
     {
         _logger = logger;
-        _connectionAdapter = connectionAdapter;
-        _heartBeatTimer = new Timer(configuration.Value.HeartBeatInterval) { AutoReset = true };
+        _heartBeatTimer = new Timer(configuration.Value.HeartBeatInterval * 1000) { AutoReset = true };
         _heartBeatTimer.Elapsed += OnHeartBeatTimerElapsed;
-        IsConnectionEstablished = false;
+        _connectionAdapter = factory.GetConnectionAdapter(configuration.Value.Type);
     }
 
     public string? Name { get; private set; }
     public string? ProtocolVersion { get; private set; }
-    public bool IsConnectionEstablished { get; private set; }
+    public bool IsConnectionEstablished => _connectionAdapter.Connected;
 
     public async Task EstablishConnectionAsync()
     {
@@ -35,15 +35,15 @@ public class MpdClient : IClient
             .ConfigureAwait(false);
 
         var response = new VersionResponse();
-        response.ParseData(_stream.ReadAllData());
 
-        IsConnectionEstablished = true;
+        response.ParseData(_stream.ReadAllData());
+        _heartBeatTimer.Start();
     }
 
     public async Task<TResponse> SendRequestAsync<TResponse>(IRequest request)
         where TResponse : IResponse, new()
     {
-        if (!IsConnectionEstablished)
+        if (!_connectionAdapter.Connected)
             throw new Exception("Connection not established.");
 
         if (_stream is null)
@@ -70,7 +70,7 @@ public class MpdClient : IClient
 
     public async Task CloseConnectionAsync()
     {
-        if (!IsConnectionEstablished)
+        if (!_connectionAdapter.Connected)
             return;
 
         await _connectionAdapter.DisconnectAsync();
@@ -96,7 +96,7 @@ public class MpdClient : IClient
 
     private async void OnHeartBeatTimerElapsed(object? sender, ElapsedEventArgs e)
     {
-        if (!IsConnectionEstablished)
+        if (!_connectionAdapter.Connected)
             return;
 
         await SendRequestAsync<PingResponse>(new PingRequest());

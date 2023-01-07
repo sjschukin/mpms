@@ -3,8 +3,12 @@ using Mpms.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configuration
+builder.Services
+    .Configure<MpdConnectionOptions>(builder.Configuration.GetSection(MpdConnectionOptions.SECTION_NAME));
+
 // Add services to the container
-builder.Services.AddMpdClient(builder.Configuration);
+builder.Services.AddMpdClient();
 
 builder.Services.AddControllers();
 builder.Services.AddHostedService<ClientService>();
