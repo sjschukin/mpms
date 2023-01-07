@@ -18,11 +18,14 @@ public class UnixSocketAdapter : IConnectionAdapter
         _socket = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.IP);
     }
 
+    public bool Connected => _socket.Connected;
+
     public async Task<Stream> CreateStreamAsync()
     {
         var endPoint = new UnixDomainSocketEndPoint(_configuration.Address);
-        _socket.SendTimeout = _configuration.CommandTimeout;
-        _socket.ReceiveTimeout = _configuration.CommandTimeout;
+        _socket.SendTimeout = _configuration.CommandTimeout * 1000;
+        _socket.ReceiveTimeout = _configuration.CommandTimeout * 1000;
+
         await _socket.ConnectAsync(endPoint)
             .ConfigureAwait(false);
 

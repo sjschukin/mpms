@@ -19,6 +19,8 @@ public class TcpIpAdapter : IConnectionAdapter
         _client = new TcpClient();
     }
 
+    public bool Connected => _client.Connected;
+
     public async Task<Stream> CreateStreamAsync()
     {
         IPHostEntry entry = await Dns.GetHostEntryAsync(_configuration.Address)
@@ -29,8 +31,8 @@ public class TcpIpAdapter : IConnectionAdapter
             throw new Exception("Cannot resolve host address.");
 
         var endPoint = new IPEndPoint(address, _configuration.Port);
-        _client.SendTimeout = _configuration.CommandTimeout;
-        _client.ReceiveTimeout = _configuration.CommandTimeout;
+        _client.SendTimeout = _configuration.CommandTimeout * 1000;
+        _client.ReceiveTimeout = _configuration.CommandTimeout * 1000;
 
         await _client.ConnectAsync(endPoint)
             .ConfigureAwait(false);
