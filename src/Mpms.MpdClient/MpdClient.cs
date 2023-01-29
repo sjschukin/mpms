@@ -31,12 +31,27 @@ public class MpdClient : IClient
 
     public async Task EstablishConnectionAsync()
     {
+        _heartBeatTimer.Stop();
+
+        if (_stream is not null)
+        {
+            await _stream.DisposeAsync()
+                .ConfigureAwait(false);
+
+            _stream = null;
+        }
+
         _stream = (NetworkStream) await _connectionAdapter.CreateStreamAsync()
             .ConfigureAwait(false);
 
+        // retrieve MPD version
         var response = new VersionResponse();
 
         response.ParseData(_stream.ReadAllData());
+
+        Name = response.Name;
+        ProtocolVersion = response.Version;
+
         _heartBeatTimer.Start();
     }
 
@@ -44,7 +59,8 @@ public class MpdClient : IClient
         where TResponse : IResponse, new()
     {
         if (!_connectionAdapter.Connected)
-            throw new Exception("Connection not established.");
+            await EstablishConnectionAsync()
+                .ConfigureAwait(false);
 
         if (_stream is null)
             throw new Exception("The stream cannot be null.");
@@ -70,6 +86,8 @@ public class MpdClient : IClient
 
     public async Task CloseConnectionAsync()
     {
+        _heartBeatTimer.Stop();
+
         if (!_connectionAdapter.Connected)
             return;
 
