@@ -4,6 +4,6 @@ public interface IConnectionAdapter : IDisposable, IAsyncDisposable
 {
     bool IsConnected { get; }
 
-    Task<Stream> CreateStreamAsync();
-    Task DisconnectAsync();
+    Task<Stream> CreateStreamAsync(CancellationToken cancellationToken);
+    Task DisconnectAsync(CancellationToken cancellationToken);
 }

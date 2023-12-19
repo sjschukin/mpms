@@ -6,19 +6,23 @@ using Mpms.Mpd.Common;
 
 namespace Mpms.Mpd.Client;
 
-public class TcpIpAdapter(ILogger<TcpIpAdapter> logger, IOptions<MpdConnectionOptions> configuration)
-    : IConnectionAdapter
+public class TcpIpAdapter : IConnectionAdapter
 {
-    private readonly ILogger<TcpIpAdapter> _logger = logger;
-    private readonly MpdConnectionOptions _configuration = configuration.Value;
+    private readonly ILogger<TcpIpAdapter> _logger;
+    private readonly MpdConnectionOptions _configuration;
     private readonly TcpClient _client = new();
+
+    public TcpIpAdapter(ILogger<TcpIpAdapter> logger, IOptions<MpdConnectionOptions> configuration)
+    {
+        _logger = logger;
+        _configuration = configuration.Value;
+    }
 
     public bool IsConnected => _client.Connected;
 
-    public async Task<Stream> CreateStreamAsync()
+    public async Task<Stream> CreateStreamAsync(CancellationToken cancellationToken)
     {
-        IPHostEntry entry = await Dns.GetHostEntryAsync(_configuration.Address)
-            .ConfigureAwait(false);
+        IPHostEntry entry = await Dns.GetHostEntryAsync(_configuration.Address, cancellationToken);
         IPAddress? address = entry.AddressList.FirstOrDefault();
 
         if (address is null)
@@ -28,15 +32,14 @@ public class TcpIpAdapter(ILogger<TcpIpAdapter> logger, IOptions<MpdConnectionOp
         _client.SendTimeout = _configuration.CommandTimeout * 1000;
         _client.ReceiveTimeout = _configuration.CommandTimeout * 1000;
 
-        await _client.ConnectAsync(endPoint)
-            .ConfigureAwait(false);
+        await _client.ConnectAsync(endPoint, cancellationToken);
 
         return _client.GetStream();
     }
 
-    public async Task DisconnectAsync()
+    public async Task DisconnectAsync(CancellationToken cancellationToken)
     {
-        await _client.Client.DisconnectAsync(true);
+        await _client.Client.DisconnectAsync(true, cancellationToken);
     }
 
     public void Dispose()
