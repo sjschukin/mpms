@@ -9,7 +9,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mpms.MpdClient", "src\Mpms.MpdClient\Mpms.MpdClient.csproj", "{641E0720-5C3F-48A8-85EA-C888FC33F268}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mpms.Mpd.Common", "src\Mpms.Mpd.Common\Mpms.Mpd.Common.csproj", "{524C993A-2BC0-4FB5-B3FB-017492DCB438}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mpms.Mpd.Client", "src\Mpms.Mpd.Client\Mpms.Mpd.Client.csproj", "{0AB8E5EE-6FB4-4B46-A8EF-F760AFA0A64C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,9 +27,13 @@ Global
 		{02297766-F7C8-4A45-8FBC-22F828C15EBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{02297766-F7C8-4A45-8FBC-22F828C15EBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{02297766-F7C8-4A45-8FBC-22F828C15EBA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{641E0720-5C3F-48A8-85EA-C888FC33F268}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{641E0720-5C3F-48A8-85EA-C888FC33F268}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{641E0720-5C3F-48A8-85EA-C888FC33F268}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{641E0720-5C3F-48A8-85EA-C888FC33F268}.Release|Any CPU.Build.0 = Release|Any CPU
+		{524C993A-2BC0-4FB5-B3FB-017492DCB438}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{524C993A-2BC0-4FB5-B3FB-017492DCB438}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{524C993A-2BC0-4FB5-B3FB-017492DCB438}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{524C993A-2BC0-4FB5-B3FB-017492DCB438}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0AB8E5EE-6FB4-4B46-A8EF-F760AFA0A64C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0AB8E5EE-6FB4-4B46-A8EF-F760AFA0A64C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0AB8E5EE-6FB4-4B46-A8EF-F760AFA0A64C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0AB8E5EE-6FB4-4B46-A8EF-F760AFA0A64C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

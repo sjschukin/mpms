@@ -1,4 +1,5 @@
-using Mpms.MpdClient;
+using Mpms.Mpd.Client;
+using Mpms.Mpd.Client.Extensions;
 using Mpms.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,10 +9,10 @@ builder.Services
     .Configure<MpdConnectionOptions>(builder.Configuration.GetSection(MpdConnectionOptions.SECTION_NAME));
 
 // Add services to the container
-builder.Services.AddMpdClient();
-
-builder.Services.AddControllers();
-builder.Services.AddHostedService<ClientService>();
+builder.Services
+    .AddMpdClient()
+    .AddHostedService<ClientService>()
+    .AddControllers();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services
@@ -27,8 +28,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-app.UseAuthorization();
+app
+    .UseHttpsRedirection()
+    .UseAuthorization();
+
 app.MapControllers();
 
 await app.RunAsync();

@@ -1,15 +1,12 @@
 namespace Mpms.Common;
 
-public interface IClient : IDisposable, IAsyncDisposable
+public interface IClient
 {
-    string? Name { get; }
-    string? ProtocolVersion { get; }
-    bool IsConnectionEstablished { get; }
-
     Task EstablishConnectionAsync();
 
-    Task<TResponse> SendRequestAsync<TResponse>(IRequest request)
-        where TResponse : IResponse, new();
+    Task<TResponse> SendRequestAsync<TRequest, TResponse>(TRequest request)
+        where TRequest : IRequest
+        where TResponse : IResponse;
 
     Task CloseConnectionAsync();
 }

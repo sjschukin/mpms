@@ -16,11 +16,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Mpms.Common\Mpms.Common.csproj" />
-      <ProjectReference Include="..\Mpms.MpdClient\Mpms.MpdClient.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Extensions" />
+      <ProjectReference Include="..\Mpms.Mpd.Client\Mpms.Mpd.Client.csproj" />
     </ItemGroup>
 
 </Project>
