@@ -1,17 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mpms", "src\Mpms\Mpms.csproj", "{CF6EB00B-5444-4131-8035-A3DF2F718564}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mpms.Common", "src\Mpms.Common\Mpms.Common.csproj", "{02297766-F7C8-4A45-8FBC-22F828C15EBA}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CBECC153-F7B4-466B-B74A-3A9B57A36AD2}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mpms.Mpd.Common", "src\Mpms.Mpd.Common\Mpms.Mpd.Common.csproj", "{524C993A-2BC0-4FB5-B3FB-017492DCB438}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mpms", "Mpms\Mpms.csproj", "{CF6EB00B-5444-4131-8035-A3DF2F718564}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mpms.Mpd.Client", "src\Mpms.Mpd.Client\Mpms.Mpd.Client.csproj", "{0AB8E5EE-6FB4-4B46-A8EF-F760AFA0A64C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mpms.Common", "Mpms.Common\Mpms.Common.csproj", "{02297766-F7C8-4A45-8FBC-22F828C15EBA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mpms.Mpd.Common", "Mpms.Mpd.Common\Mpms.Mpd.Common.csproj", "{524C993A-2BC0-4FB5-B3FB-017492DCB438}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mpms.Mpd.Client", "Mpms.Mpd.Client\Mpms.Mpd.Client.csproj", "{0AB8E5EE-6FB4-4B46-A8EF-F760AFA0A64C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
