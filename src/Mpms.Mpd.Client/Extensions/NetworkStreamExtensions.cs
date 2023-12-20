@@ -6,14 +6,14 @@ internal static class NetworkStreamExtensions
 {
     private const int BUFFER_SIZE = 1024;
 
-    public static byte[] ReadAllData(this NetworkStream stream)
+    public static async Task<byte[]> ReadAllDataAsync(this NetworkStream stream, CancellationToken cancellationToken)
     {
         byte[] allData = Array.Empty<byte>();
 
         do
         {
             var data = new byte[BUFFER_SIZE];
-            int bytes = stream.Read(data, 0, data.Length);
+            int bytes = await stream.ReadAsync(data, cancellationToken);
 
             byte[] allDataTemp = allData;
             allData = new byte[allDataTemp.Length + bytes];

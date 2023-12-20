@@ -1,12 +1,12 @@
 namespace Mpms.Common;
 
-public interface IClient
+public interface IClient : IDisposable
 {
-    Task EstablishConnectionAsync();
+    Task EstablishConnectionAsync(CancellationToken cancellationToken);
 
-    Task<TResponse> SendRequestAsync<TRequest, TResponse>(TRequest request)
+    Task<TResponse> SendRequestAsync<TRequest, TResponse>(TRequest request, Func<byte[], TResponse> creator, CancellationToken cancellationToken)
         where TRequest : IRequest
         where TResponse : IResponse;
 
-    Task CloseConnectionAsync();
+    Task CloseConnectionAsync(CancellationToken cancellationToken);
 }

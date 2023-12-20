@@ -1,8 +1,11 @@
 using System.Net.Sockets;
 using System.Timers;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mpms.Common;
+using Mpms.Mpd.Client.Commands;
+using Mpms.Mpd.Client.Extensions;
 using Mpms.Mpd.Common;
 using Timer = System.Timers.Timer;
 
@@ -15,65 +18,65 @@ public class MpdClient : IClient
     private readonly IConnectionAdapter _connectionAdapter;
     private NetworkStream? _stream;
 
-    public MpdClient(ILogger<MpdClient> logger, IConnectionAdapterFactory factory, IOptions<MpdConnectionOptions> configuration)
+    public MpdClient(ILogger<MpdClient> logger, IServiceProvider serviceProvider, IOptions<MpdConnectionOptions> configuration)
     {
         _logger = logger;
         _heartBeatTimer = new Timer(configuration.Value.HeartBeatInterval * 1000) { AutoReset = true };
         _heartBeatTimer.Elapsed += OnHeartBeatTimerElapsed;
-        _connectionAdapter = factory.GetConnectionAdapter(configuration.Value.Type);
+        _connectionAdapter =
+            serviceProvider.GetKeyedService<IConnectionAdapter>(configuration.Value.Type)
+            ?? throw new InvalidOperationException("Could not find a suitable connection adapter from settings.");
     }
 
     public string? Name { get; private set; }
     public string? ProtocolVersion { get; private set; }
     public bool IsConnectionEstablished => _connectionAdapter.IsConnected;
 
-    public async Task EstablishConnectionAsync()
+    public async Task EstablishConnectionAsync(CancellationToken cancellationToken)
     {
         _heartBeatTimer.Stop();
 
         if (_stream is not null)
         {
-            await _stream.DisposeAsync()
-                .ConfigureAwait(false);
-
+            await _stream.DisposeAsync();
             _stream = null;
         }
 
-        _stream = (NetworkStream) await _connectionAdapter.CreateStreamAsync()
+        _stream = (NetworkStream) await _connectionAdapter.CreateStreamAsync(cancellationToken)
             .ConfigureAwait(false);
 
+        _logger.LogInformation("Connection established.");
+
         // retrieve MPD version
-        var response = new VersionResponse();
-
-        response.ParseData(_stream.ReadAllData());
-
+        var response = new VersionResponse(await _stream.ReadAllDataAsync(cancellationToken));
         Name = response.Name;
         ProtocolVersion = response.Version;
+
+        _logger.LogInformation("Name: {Name}", Name);
+        _logger.LogInformation("Protocol: {Version}", ProtocolVersion);
 
         _heartBeatTimer.Start();
     }
 
-    public async Task<TResponse> SendRequestAsync<TResponse>(IRequest request)
-        where TResponse : IResponse, new()
+    public async Task<TResponse> SendRequestAsync<TRequest, TResponse>(
+        TRequest request, Func<byte[], TResponse> creator, CancellationToken cancellationToken)
+        where TRequest : IRequest
+        where TResponse : IResponse
     {
         if (!_connectionAdapter.IsConnected)
-            await EstablishConnectionAsync()
-                .ConfigureAwait(false);
+            await EstablishConnectionAsync(cancellationToken);
 
         if (_stream is null)
             throw new Exception("The stream cannot be null.");
 
         try
         {
-            var sendBuffer = request.Data;
+            byte[] sendBuffer = request.Data;
 
             _heartBeatTimer.Stop();
-            await _stream.WriteAsync(sendBuffer, 0, sendBuffer.Length)
-                .ConfigureAwait(false);
+            await _stream.WriteAsync(sendBuffer, cancellationToken);
 
-            var response = new TResponse();
-            response.ParseData(_stream.ReadAllData());
-
+            var response = creator(await _stream.ReadAllDataAsync(cancellationToken));
             return response;
         }
         finally
@@ -82,14 +85,14 @@ public class MpdClient : IClient
         }
     }
 
-    public async Task CloseConnectionAsync()
+    public Task CloseConnectionAsync(CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Closing connection.");
         _heartBeatTimer.Stop();
 
-        if (!_connectionAdapter.IsConnected)
-            return;
-
-        await _connectionAdapter.DisconnectAsync();
+        return _connectionAdapter.IsConnected
+            ? _connectionAdapter.DisconnectAsync(cancellationToken)
+            : Task.CompletedTask;
     }
 
     #region IDisposable, IAsyncDisposable
@@ -115,6 +118,7 @@ public class MpdClient : IClient
         if (!_connectionAdapter.IsConnected)
             return;
 
-        await SendRequestAsync<PingResponse>(new PingRequest());
+        await SendRequestAsync<PingRequest, PingResponse>(
+            new PingRequest(), (data) => new PingResponse(data), CancellationToken.None);
     }
 }
