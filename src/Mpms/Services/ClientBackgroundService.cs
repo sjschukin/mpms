@@ -36,7 +36,11 @@ public class ClientBackgroundService : BackgroundService
 
             _logger.LogInformation("Connection closed.");
         }
-        catch (Exception e)
+        catch (TaskCanceledException)
+        {
+            _logger.LogInformation("Execution was cancelled by the user.");
+        }
+        catch (Exception e) when(e is not TaskCanceledException)
         {
             _logger.LogError(e, "Unhandled exception occurred.");
             throw;
@@ -50,6 +54,6 @@ public class ClientBackgroundService : BackgroundService
 
     private void OnStopServiceCallback()
     {
-        _logger.LogInformation("{name} is stopping.", nameof(ClientBackgroundService));
+        _logger.LogInformation("{name} is stopping...", nameof(ClientBackgroundService));
     }
 }
