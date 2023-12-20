@@ -1,8 +1,14 @@
 using Mpms.Mpd.Client;
 using Mpms.Mpd.Client.Extensions;
 using Mpms.Services;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+Environment.CurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
+
+// Logging
+builder.Host
+    .UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
 
 // Configuration
 builder.Services
